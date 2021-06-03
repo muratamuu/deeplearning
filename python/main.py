@@ -1,27 +1,21 @@
 # coding: utf-8
-#import sys, os
-#sys.path.append(os.pardir)
 import numpy as np
 import matplotlib.pylab as plt
 import pickle
 from collections import OrderedDict
 from mnist import load_mnist
 
-def identity_function(x):
-    return x
-
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
-def sigmoid_grad(x):
-    return (1.0 - sigmoid(x)) * sigmoid(x)
-
-def relu(x):
-    return np.maximum(0, x)
-
+# ソフトマックス
+# exp(x) / sum(exp(x)) -> 合計すると1.0になるように均す
 def softmax(x):
+    # 次元数は変わらない (100, 784) -> (100, 784) で出力する
     x = x - np.max(x, axis=-1, keepdims=True) # オーバーフロー対策
     return np.exp(x) / np.sum(np.exp(x), axis=-1, keepdims=True)
+
+def test_softmax():
+    x = np.random.randn(2, 3, 4)
+    print(x)
+    print(softmax(x))
 
 # すべての変数の偏微分をベクトルとしてまとめたもの: 勾配(gradient)
 def numerical_gradient(f, x):
@@ -47,6 +41,15 @@ def numerical_gradient(f, x):
         it.iternext()
 
     return grad
+
+def test_numerical_gradient():
+    # 偏微分のテスト用関数 f(x1,x2) = x1**2 + x2**2 + x3 ** 2
+    def test_function(x):
+        return np.sum(x**2) # x[0]**2 + x[1]**2 + x[2]**2
+
+    print(numerical_gradient(test_function, np.array([3.0, 4.0, 5.0])))
+    print(numerical_gradient(test_function, np.array([0.0, 2.0, 3.0])))
+    print(numerical_gradient(test_function, np.array([3.0, 0.0, 2.0])))
 
 def cross_entropy_error(y, t):
     # ニューラルネットワークの出力yが1次元(1個のデータの結果しかない)の場合
